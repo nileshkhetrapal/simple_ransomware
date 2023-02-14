@@ -68,8 +68,8 @@ def predict(filepath):
 
 
 def main():
-    #filepath = input("Enter the path to the file: ")
-    filepath = "/workspaces/simple_ransomware/ransomeware.py"
+    filepath = input("Enter the path to the file: ")
+    #filepath = "/workspaces/simple_ransomware/ransomeware.py"
     if filepath:
         spectrogram_filepath = def_spectrogram(filepath, "spectrograms")
         result = predict(spectrogram_filepath)
