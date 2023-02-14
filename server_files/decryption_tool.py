@@ -57,11 +57,11 @@ def crawl_directory(key):
 
 def main():
     #Get the key from the user.
-    #key = input("Enter the key: ")
-    key = "I0yJumiRBAtE14REUtMBPbW1vvUyDhxl"
+    key = input("Enter the key: ")
+    #key = "I0yJumiRBAtE14REUtMBPbW1vvUyDhxl"
     #Get the file to decrypt.
-    #filename = input("Enter the filename to decrypt: ")
-    filename = "file1.txt.nile"
+    filename = input("Enter the filename to decrypt: ")
+    
     #Decrypt the file.
     crawl_directory(key)
     #Delete the encrypted file.
