@@ -1,11 +1,8 @@
-import tkinter as tk
 import requests
-from tkinter import filedialog
-from tkinter import messagebox
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fft import fft
-import os, time, uuid
+import os, time
 import json
 
 # Replace with valid values
@@ -33,13 +30,9 @@ def def_spectrogram(filepath, directory):
     # Create the spectrogram visualization
     plt.specgram(signal, NFFT=1024, Fs=44100)
     # Place the labels
-    plt.xlabel("Time (s)")
-    plt.ylabel("Frequency (Hz)")
     # Place the title with the filename
     filename = os.path.basename(filepath)
-    plt.title("Spectrogram of " + filename)
     #put the gradient legend
-    plt.colorbar().set_label("Intensity [dB]")
     #Convert the plot to an image
     #Create the savefile path
     savefile = os.path.join(directory, filename + ".png")
@@ -69,33 +62,22 @@ def predict(filepath):
     # Get the prediction with the highest probability
     prediction = max(response["predictions"], key=lambda x: x["probability"])
     probability = prediction["probability"]
-    print(f"Prediction: {prediction['tagName']}, Probability: {probability}")
+    
+    #print(f"Prediction: {prediction['tagName']}, Probability: {probability}")
     return prediction["tagName"], probability
 
-# Tkinter GUI code
-root = tk.Tk()
-root.title("Malware Predictor")
-#Make the window take quarter of the screen
-root.geometry("400x400")
-#Create a title
-title = tk.Label(root, text="Malware Predictor", font=("Helvetica", 24))
-title.pack()
 
-def open_file():
-    filepath = filedialog.askopenfilename(initialdir = "/", title = "Select file", filetypes = (("All files", "*.*"), ("Executable files", "*.exe")))
+def main():
+    #filepath = input("Enter the path to the file: ")
+    filepath = "/workspaces/simple_ransomware/ransomeware.py"
     if filepath:
         spectrogram_filepath = def_spectrogram(filepath, "spectrograms")
         result = predict(spectrogram_filepath)
         prediction , probability = result
-        messagebox.showinfo("Prediction", f"Prediction: {prediction}, Probability: {probability}")
+        print("Prediction", f"Prediction: {prediction}, Probability: {probability}")
+        #Remove the spectrogram
+        os.remove(spectrogram_filepath)
+        #Remove the spectrogram directory
+        os.rmdir("spectrograms")
 
-open_file_button = tk.Button(root, text="Open File", command=open_file)
-open_file_button.pack()
-
-#There should be colored box with the prediction
-#If the prediction is benign, the box should be green
-#If the prediction is malignant, the box should be red
-
-#predict = tk.Button(root, text="Predict", command=predict)
-
-root.mainloop()
+main()
