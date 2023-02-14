@@ -1,67 +1,72 @@
-key = "1234567890123456"
-#The goal of this script is to decrypt files that have been encrypted by the ransomware.
-#The script will take the key as an argument.
-
 import os
-import sys
-import smtplib
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.backends import default_backend
 
 
-
 #This function will decrypt the file using the key.
-def decrypt(key, filename):
-    chunksize = 64 * 1024
-    #The output file will be the same as the input file, but without the .nile extension.
-    outputFile = filename[:-5]
+def decrypt_file(key, in_filename, out_filename=None, chunksize=64*1024):
+    """Decrypts a file using AES (CBC mode) with the given key.
 
-    with open(filename, 'rb') as infile:
-        filesize = int(infile.read(16))
-        IV = infile.read(16)
+    key:
+        The decryption key - a bytes object of length 16, 24, or 32.
 
-        decryptor = AES.new(key, AES.MODE_CBC, IV)
+    in_filename:
+        Name of the input file
 
-        with open(outputFile, 'wb') as outfile:
+    out_filename:
+        If None, '<in_filename>.dec' will be used.
+
+    chunksize:
+        Sets the size of the chunk which the function uses to read
+        and decrypt the file. Larger chunk sizes can be faster for
+        some files and machines. chunksize must be divisible by 16.
+    """
+    #Convert the key to a byte array.
+    key = bytes(key, 'utf-8')
+
+    if not out_filename:
+        out_filename = os.path.splitext(in_filename)[0]
+
+    with open(in_filename, 'rb') as infile:
+        iv = infile.read(16)
+        decryptor = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend()).decryptor()
+
+        with open(out_filename, 'wb') as outfile:
             while True:
                 chunk = infile.read(chunksize)
-
                 if len(chunk) == 0:
                     break
+                outfile.write(decryptor.update(chunk))
 
-                outfile.write(decryptor.decrypt(chunk))
-                outfile.truncate(filesize)
+            outfile.write(decryptor.finalize())
 
-#This function will get the files from the OS
-def getFiles():
-    #This will get the files from the OS.
-    files = os.listdir()
-    #This will return the files.
-    return files
-
-
-#This function will decrypt the files.
-def decryptFiles(key, files):
-    #This will loop through the files.
+#Crawl the directory and decrypt all the files.
+#Make sure they are encrypted files.
+def crawl_directory(key):
+    #Get the current working directory.
+    cwd = os.getcwd()
+    #Get the list of files in the directory.
+    files = os.listdir(cwd)
+    #Loop through the files.
     for file in files:
-        #This will check if the file is encrypted.
-        if file.endswith(".nile"):
-            #This will decrypt the file.
-            decrypt(key, file)
-            #This will print the file name.
-            print("Decrypted %s" % str(file))
-        #This will check if the file is not encrypted.
-        elif not file.endswith(".nile"):
-            #This will print the file name.
-            print("Not encrypted %s" % str(file))
+        #Get the file extension.
+        ext = os.path.splitext(file)[1]
+        #If the file is encrypted, decrypt it.
+        if ext == ".nile":
+            decrypt_file(key, file)
 
 def main():
-    #This will get the files.
-    files = getFiles()
-    #This will get the key.
-    #This will decrypt the files.
-    decryptFiles(key, files)
+    #Get the key from the user.
+    #key = input("Enter the key: ")
+    key = "I0yJumiRBAtE14REUtMBPbW1vvUyDhxl"
+    #Get the file to decrypt.
+    #filename = input("Enter the filename to decrypt: ")
+    filename = "file1.txt.nile"
+    #Decrypt the file.
+    crawl_directory(key)
+    #Delete the encrypted file.
+    os.remove(filename)
+    print("File has been decrypted successfully.")
 
-#This will call the main function.
-main()
-
+if __name__ == '__main__':
+    main()
