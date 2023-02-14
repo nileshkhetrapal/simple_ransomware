@@ -11,4 +11,5 @@ def store_data():
     with open('/var/www/html/data.txt', 'a') as f:
         f.write(str(data) + '\n')
     return "Data stored successfully"
-
+if __name__ == '__main__':
+    app.run()
